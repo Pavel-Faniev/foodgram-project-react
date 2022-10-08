@@ -1,6 +1,6 @@
 FROM python:3.7-slim
-RUN mkdir /app
 WORKDIR /app
-COPY . .
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt --no-cache-dir
-CMD ["/bin/bash", "./script.sh"]
+COPY . .
+CMD ["/bin/bash", "./myscript.sh"]
