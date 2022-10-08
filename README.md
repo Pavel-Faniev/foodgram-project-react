@@ -6,6 +6,12 @@ Foodgram реализован для публикации рецептов. Ав
 в покупки, скачать список покупок ингредиентов для добавленных в покупки
 рецептов.
 
+**Стек технологий**
+- Django
+- Djangorestframework
+- Docker
+- Docker-compose
+
 ## Подготовка и запуск проекта
 ### Склонировать репозиторий на локальную машину:
 ```
@@ -72,23 +78,15 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 ```
 sudo docker-compose up -d --build
 ```
-* После успешной сборки на сервере выполните команды (только после первого деплоя):
-    - Соберите статические файлы:
+* После успешной сборки на сервере автоматически выполнится следующее:
     ```
-    sudo docker-compose exec backend python manage.py collectstatic --noinput
+    Выполнятся миграции
     ```
-    - Примените миграции:
     ```
-    sudo docker-compose exec backend python manage.py migrate --noinput
+    Соберется статика
     ```
-    - Загрузите ингридиенты  в базу данных (необязательно):  
-    *Если файл не указывать, по умолчанию выберется ingredients.json*
     ```
-    sudo docker-compose exec backend python manage.py load_ingredients <Название файла из директории data>
-    ```
-    - Создать суперпользователя Django:
-    ```
-    sudo docker-compose exec backend python manage.py createsuperuser
+    Загрузится БД
     ```
     - Проект будет доступен по вашему IP
 

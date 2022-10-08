@@ -12,9 +12,11 @@ User = get_user_model()
 
 
 class SubscribeApiView(APIView):
+    """APIView подписки/отписка на автора"""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        """Подписка"""
         pk = kwargs.get('id', None)
         author = get_object_or_404(User, pk=pk)
         user = request.user
@@ -38,6 +40,7 @@ class SubscribeApiView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
+        """Отписка"""
         user = request.user
         author = get_object_or_404(User, id=id)
         try:
@@ -53,6 +56,7 @@ class SubscribeApiView(APIView):
 
 
 class ListSubscribeViewSet(generics.ListAPIView):
+    """Лист подписчиков"""
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SubscribeViewSerializer

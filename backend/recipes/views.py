@@ -18,6 +18,7 @@ from .utils import get_shopping_list
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели рецепта"""
     queryset = Recipe.objects.all().order_by("-id")
     filter_backends = [DjangoFilterBackend]
     filter_class = RecipeFilter
@@ -54,6 +55,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request, pk=None):
+        """Метод для добавления/удаления из избранного"""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == "POST":
@@ -71,6 +73,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def shopping_cart(self, request, pk=None):
+        """Метод для добавления/удаления из продуктовой корзины"""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == "POST":
@@ -88,6 +91,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path="download_shopping_cart",
     )
     def download_shopping_cart(self, request):
+        """Метод для скачивания списка продуктов из продуктовой корзины"""
         ingredients_list = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user
         ).values(
@@ -98,6 +102,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели ингридиента"""
     pagination_class = None
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -108,6 +113,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
 
 
 class TagsViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели тега"""
     pagination_class = None
     queryset = Tag.objects.all()
     serializer_class = TagSerializer

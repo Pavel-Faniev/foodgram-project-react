@@ -1,8 +1,10 @@
+from tabnanny import verbose
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
+    """Модель пользователя"""
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     USER = 'user'
@@ -34,6 +36,8 @@ class User(AbstractUser):
         return self.role == self.ADMIN or self.is_superuser
 
     class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ('username',)
 
     def __str__(self):
@@ -43,6 +47,7 @@ class User(AbstractUser):
 
 
 class Subscribe(models.Model):
+    """ Модель подписки на автора"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -55,6 +60,8 @@ class Subscribe(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
