@@ -20,7 +20,7 @@ services:
       - ./.env
 
   frontend:
-    image: pfaniev/foodgram_frontend:v1
+    image: pfaniev/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
