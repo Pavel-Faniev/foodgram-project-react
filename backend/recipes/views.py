@@ -50,21 +50,36 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["POST", "DELETE"],
+        methods=["GET", "DELETE"],
         url_path="favorite",
         permission_classes=[IsAuthenticated],
     )
+    def add_obj(self, model, user, pk):
+        if model.objects.filter(user=user, recipe__id=pk).exists():
+            return Response({
+                'errors': 'Рецепт уже добавлен в список'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = FavoriteSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_obj(self, model, user, pk):
+        obj = model.objects.filter(user=user, recipe__id=pk)
+        if obj.exists():
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            'errors': 'Рецепт уже удален'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
     def favorite(self, request, pk=None):
         """Метод для добавления/удаления из избранного"""
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if request.method == "POST":
-            self.post(Favorite,
-                      FavoriteSerializer,
-                      "Вы уже добавили рецепт в избранное",
-                      user, recipe, request)
-        if request.method == "DELETE":
-            self.delete(Favorite, user, recipe)
+        if request.method == 'GET':
+            return self.add_obj(Favorite, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(Favorite, request.user, pk)
+        return None
 
     @action(
         detail=True,
