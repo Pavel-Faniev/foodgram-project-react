@@ -75,6 +75,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            sudo docker pull pfaniev/foodgram_backend:v1
+            sudo docker pull pfaniev/foodgram_frontend:v1
             sudo docker-compose stop
             sudo docker-compose rm backend
             sudo docker-compose rm frontend
