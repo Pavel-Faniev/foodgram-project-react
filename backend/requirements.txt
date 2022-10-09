@@ -11,6 +11,7 @@ djangorestframework==3.12.4
 djangorestframework-simplejwt==4.7.2
 djoser==2.1.0
 drf-spectacular==0.18.0
+drf-yasg==1.21.4
 flake8==3.9.2
 flake8-broken-line==0.3.0
 flake8-isort==4.0.0
@@ -29,3 +30,4 @@ PyJWT==2.1.0
 python-dotenv==0.19.2
 requests==2.26.0
 testfixtures==6.18.1
+pyyaml ==6.0
