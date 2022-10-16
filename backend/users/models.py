@@ -5,13 +5,13 @@ from django.db import models
 class User(AbstractUser):
     """Модель пользователя"""
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name',)
     USER = 'user'
     ADMIN = 'admin'
 
     ROLES = (
-        (USER, USER),
-        (ADMIN, ADMIN),
+        (USER, 'Пользователь'),
+        (ADMIN, 'Администратор'),
     )
 
     username = models.TextField('Пользователь',

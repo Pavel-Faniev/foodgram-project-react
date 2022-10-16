@@ -17,20 +17,9 @@ class SubscribeApiView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Подписка"""
-        pk = kwargs.get('id', None)
+        pk = kwargs.get('id')
         author = get_object_or_404(User, pk=pk)
         user = request.user
-
-        if author == user:
-            return Response(
-                {'error': 'Нельзя подписаться на самого себя'},
-                status=status.HTTP_400_BAD_REQUEST)
-
-        if Subscribe.objects.filter(author=author, user=user).exists():
-            return Response(
-                {'error': 'Вы уже подписаны на этого пользователя'},
-                status=status.HTTP_400_BAD_REQUEST)
-
         obj = Subscribe(author=author, user=user)
         obj.save()
 

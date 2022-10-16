@@ -26,9 +26,3 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(apipatterns)),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.STATIC_URL,
-        document_root=settings.STATICFILES_DIRS
-    )

@@ -4,6 +4,7 @@ from .models import Ingredient, Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
+    """Фильтр рецептов"""
     tags = filters.filters.ModelMultipleChoiceFilter(
         queryset=Tag.objects.all(),
         field_name='tags__slug',
@@ -18,6 +19,7 @@ class RecipeFilter(filters.FilterSet):
     )
 
     def filter(self, queryset, name, value):
+        """Метод фильтрации рецептов"""
         if name == 'is_in_shopping_cart' and value:
             queryset = queryset.filter(
                 shopping_cart__user=self.request.user
@@ -30,12 +32,13 @@ class RecipeFilter(filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['author', 'tags', 'is_in_shopping_cart', 'is_favorited']
+        fields = ('author', 'tags', 'is_in_shopping_cart', 'is_favorited',)
 
 
 class IngredientsFilter(filters.FilterSet):
+    """Фильтр ингредиентов"""
     name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
 
     class Meta:
         model = Ingredient
-        fields = ['name']
+        fields = ('name',)

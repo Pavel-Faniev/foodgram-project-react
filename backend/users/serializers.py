@@ -1,7 +1,7 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from foodgram.settings import RECIPES_LIMIT
 from recipes.models import Recipe
 from rest_framework import serializers
 
@@ -11,6 +11,7 @@ User = get_user_model()
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
+    """Cериализатор регистрации"""
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
@@ -18,6 +19,7 @@ class UserRegistrationSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    """Сериализатор модели пользователя"""
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -26,16 +28,16 @@ class CustomUserSerializer(UserSerializer):
                   'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        request = self.context['request']
-        if not request or request.user.is_anonymous:
+        """ Метод обработки параметра is_subscribed"""
+        user = self.context.get('request').user
+        if not user or user.is_anonymous:
             return False
-        return Subscribe.objects.filter(
-            user=self.context['request'].user,
-            author=obj
-        ).exists()
+        return Subscribe.objects.filter(user=user, author=obj).exists()
 
 
 class SubscribeUserSerializer(serializers.ModelSerializer):
+    """Сериализатор вывода авторов на которых подписан текущий пользователь.
+    """
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
@@ -44,8 +46,9 @@ class SubscribeUserSerializer(serializers.ModelSerializer):
         fields = ('user', 'author')
 
     def validate(self, data):
-        user = self.context['request'].user
-        subscribing_id = data['author'].id
+        """Валидатор подписки на пользователя"""
+        user = self.context.get('request').user
+        subscribing_id = self.data.get['author'].id
         if Subscribe.objects.filter(user=user,
                                     subscribing__id=subscribing_id).exists():
             raise serializers.ValidationError(
@@ -53,17 +56,21 @@ class SubscribeUserSerializer(serializers.ModelSerializer):
         if user.id == subscribing_id:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя')
+        if user.id is None:
+            raise serializers.ValidationError(
+                'Пользователь не существует')
         return data
 
 
 class SubscribingRecipesSerializers(serializers.ModelSerializer):
-
+    """Сериализатор списка рецептов подписанных авторов"""
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class SubscribeViewSerializer(serializers.ModelSerializer):
+    """Сериализатор подписок"""
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -75,19 +82,22 @@ class SubscribeViewSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_is_subscribed(self, obj):
-        if not self.context['request'].user.is_authenticated:
+        """ Метод обработки параметра is_subscribed"""
+        if not self.context.get('request').user.is_authenticated:
             return False
         return Subscribe.objects.filter(
             author=obj, user=self.context['request'].user).exists()
 
     def get_recipes(self, obj):
+        """Метод получения данных рецептов автора"""
         recipes_limit = int(self.context['request'].GET.get(
-            'recipes_limit', RECIPES_LIMIT))
+            'recipes_limit', settings.RECIPES_LIMIT))
         user = get_object_or_404(User, pk=obj.pk)
         recipes = Recipe.objects.filter(author=user)[:recipes_limit]
 
         return SubscribingRecipesSerializers(recipes, many=True).data
 
     def get_recipes_count(self, obj):
+        """Метод подсчета количества рецептов автора."""
         user = get_object_or_404(User, pk=obj.pk)
         return Recipe.objects.filter(author=user).count()

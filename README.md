@@ -11,6 +11,7 @@ Foodgram реализован для публикации рецептов. Ав
 - Djangorestframework
 - Docker
 - Docker-compose
+- Nginx
 
 ## Подготовка и запуск проекта
 ### Склонировать репозиторий на локальную машину:
@@ -87,6 +88,16 @@ sudo docker-compose up -d --build
     ```
     ```
     Загрузится БД
+    ```
+* Для создания супер пользователя выполните следующие команды:
+    ```
+    docker container ls
+    ```
+    ```
+     winpty docker exec -it [id backend контейнера] bash
+    ```
+    ```
+    python manage.py createsuperuser
     ```
     - Проект будет доступен по вашему IP
 

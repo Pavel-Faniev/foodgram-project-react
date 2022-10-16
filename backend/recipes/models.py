@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 User = get_user_model()
@@ -22,7 +23,8 @@ class Recipe(models.Model):
         verbose_name='Картинка',
     )
     text = models.TextField(
-        verbose_name='Описание'
+        verbose_name='Описание',
+        max_length=2000
     )
     ingredients = models.ManyToManyField(
         'Ingredient',
@@ -35,11 +37,14 @@ class Recipe(models.Model):
         related_name='tag_recipes',
         verbose_name='Теги',
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1,
                               'Минимальное время приготовления 1 мин'
-                              )
+                              ),
+            MaxValueValidator(600,
+                              'Приготовь попроще, жизнь не равно кухня'
+                              ),
         ],
         verbose_name='Время приготовления (в минутах)',
     )
@@ -58,6 +63,7 @@ class Tag(models.Model):
         max_length=200,
         verbose_name='Название тега',
         db_index=True,
+        unique=True,
     )
     color = models.CharField(
         'Цвет',
@@ -80,7 +86,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -101,7 +107,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -119,9 +125,10 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Ингредиент по рецепту'
     )
-    amount = models.PositiveIntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
-        validators=(MinValueValidator(1),)
+        validators=(MinValueValidator(1),
+                    MaxValueValidator(1440),)
     )
 
 
@@ -139,6 +146,10 @@ class RecipeTag(models.Model):
         related_name='recipe_tag',
         verbose_name='Тег рецепта',
     )
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
 
 class Favorite(models.Model):
