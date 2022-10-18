@@ -9,9 +9,7 @@ services:
       - ./.env
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: pfaniev/foodgram_backend:v4
     restart: always
     volumes:
       - static_backend_value:/app/static_backend/
@@ -20,7 +18,7 @@ services:
       - db
     env_file:
       - ./.env
-      
+
   frontend:
     image: pfaniev/foodgram_frontend:latest
     volumes:

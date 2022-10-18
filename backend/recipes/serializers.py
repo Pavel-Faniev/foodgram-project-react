@@ -1,4 +1,6 @@
+from unicodedata import name
 from drf_extra_fields.fields import Base64ImageField
+from jsonschema import ValidationError
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
 
@@ -78,18 +80,33 @@ class AddRecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Нужно выбрать минимум 1 ингредиент!')
         for ingredient in ingredients:
-            if int(ingredient.get('amount')) <= 0:
+            try:
+                int(ingredient.get('amount'))
+                if int(ingredient.get('amount')) <= 0:
+                    raise serializers.ValidationError(
+                        'Количество должно быть положительным!')
+            except Exception:
+                raise ValidationError({'amount': 'Колличество должно'
+                                      'быть числом'})
+            check_id = ingredient['id']
+            check_ingredient = Ingredient.objects.filter(id=check_id)
+            if not check_ingredient.exists():
                 raise serializers.ValidationError(
-                    'Количество должно быть положительным!')
+                    'Данного продукта нет в базе!')
         return data
 
     def validate_cooking_time(self, data):
         """Валидатор времени приготовления"""
         cooking_time = self.initial_data.get('cooking_time')
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError(
-                'Время готовки не может быть'
-                ' отрицательным числом или нулем!')
+        try:
+            int(cooking_time)
+            if int(cooking_time) <= 0:
+                raise serializers.ValidationError(
+                    'Время готовки не может быть'
+                    ' отрицательным числом или нулем!')
+        except Exception:
+            raise ValidationError({'cooking_time': 'Время приготовления'
+                                   'должно быть больше 0'})
         return data
 
     def validate_tags(self, data):
@@ -104,6 +121,9 @@ class AddRecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     f'Тег с id = {tag_id} не существует'
                 )
+        tags_bd = set(tags)
+        if len(tags) != len(tags_bd):
+            raise ValidationError('Теги должны быть уникальными')
         return data
 
     def create_bulk(self, recipe, ingredients_data):
@@ -184,7 +204,7 @@ class ShowRecipeFullSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Проверяет находится ли рецепт в избранном."""
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
+        if request.user.is_anonymous:
             return False
         return Favorite.objects.filter(recipe=obj,
                                        user=request.user).exists()
@@ -192,7 +212,7 @@ class ShowRecipeFullSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Проверяет находится ли рецепт в продуктовой корзине."""
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
+        if request.user.is_anonymous:
             return False
         return ShoppingCart.objects.filter(recipe=obj,
                                            user=request.user).exists()
