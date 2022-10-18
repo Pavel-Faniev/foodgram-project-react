@@ -1,4 +1,3 @@
-from unicodedata import name
 from drf_extra_fields.fields import Base64ImageField
 from jsonschema import ValidationError
 from rest_framework import serializers
